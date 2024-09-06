@@ -1,24 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { fetchUser } from "@/store/reducer/userFetchReducer";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
 } from "@nextui-org/react";
-import easyLogo from "../../../public/assets/Images/easy.png";
-import jazzLogo from "../../../public/assets/Images/jazz.png";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import bankLogo from "../../../public/assets/Images/bank.png";
 import cashLogo from "../../../public/assets/Images/cash.png";
-import screenShot from "../../../public/assets/Images/jazzcashImage.jpg";
-import Image from "next/image";
-import { auth, firestore, storage } from "../../config/firebase";
-import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import easyLogo from "../../../public/assets/Images/easy.png";
+import jazzLogo from "../../../public/assets/Images/jazz.png";
+import { firestore, storage } from "../../config/firebase";
 import { showToast } from "../toast/Toast";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "@/store/reducer/userFetchReducer";
 
 export default function CheckoutModal({
   isOpen,

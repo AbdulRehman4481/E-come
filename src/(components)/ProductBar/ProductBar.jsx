@@ -1,8 +1,7 @@
 import { useDisclosure } from "@nextui-org/react";
 import Image from "next/image";
 import React, { useState } from "react";
-import products from "../../data/product.json";
-import DetailModal from "../DetailMOdal/DetailModal";
+import DetailModal from "../DetailModal/DetailModal";
 
 export default function ProductBar({ sortedProducts, heading }) {
   const {

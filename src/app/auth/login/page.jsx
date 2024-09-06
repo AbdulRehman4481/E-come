@@ -75,7 +75,7 @@ export default function Login() {
           </button>
         </form>
         <span className="text-sm text-white mt-4">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a href="/auth/register" className="text-blue-400 underline">
             Sign up
           </a>

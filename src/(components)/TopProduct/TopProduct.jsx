@@ -27,7 +27,7 @@ export default function TopProduct() {
     } else if (filterText === "Computer") {
       setShowProduct(computers);
     }
-  }, [filterText]);
+  }, [filterText,computers,sortedProducts]);
 
   const settings = {
     dots: true,

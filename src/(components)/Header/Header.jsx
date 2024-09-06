@@ -1,45 +1,48 @@
 "use client";
-import { auth, firestore } from "@/config/firebase";
+import { auth, firestore } from "../../config/firebase";
 import {
   Navbar,
   NavbarBrand,
   NavbarContent,
   NavbarItem,
 } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BiHeart, BiSearch, BiUser } from "react-icons/bi";
+import { BiSearch } from "react-icons/bi";
 import { BsCart4 } from "react-icons/bs";
 import { IoReorderThree } from "react-icons/io5";
 import { showToast } from "../toast/Toast";
-import { IoIosLogOut } from "react-icons/io";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { LuUser2 } from "react-icons/lu";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 export default function Header() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+
   const [cartProduct, setCartProduct] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false); // For dropdown toggle
 
   const router = useRouter();
   const userData = auth.currentUser;
+
   useEffect(() => {
-    const getCart = async () => {
-      if (userData && userData.uid) {
-        const q = query(
-          collection(firestore, "carts"),
-          where("userId", "==", userData.uid)
-        );
-        try {
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            // console.log("data", data);
-            setCartProduct(data.products);
-          });
-        } catch (error) {
-          console.error("Error fetching cart data:", error);
+      const getCart = async () => {
+        if (userData && userData.uid) {
+          const q = query(
+            collection(firestore, "carts"),
+            where("userId", "==", userData.uid)
+          );
+          try {
+            onSnapshot(q, (snapshot) => {
+              snapshot.forEach((doc) => {
+                const data = doc.data();
+                setCartProduct(data.products);
+              });
+            });
+          } catch (error) {
+            console.error("Error fetching cart data:", error);
+          }
         }
-      }
     };
 
     getCart();
@@ -56,18 +59,18 @@ export default function Header() {
 
   const handleNavigation = (path) => {
     if (userData) {
-      router.push(path);
+      redirect(path);
     } else {
       router.push("/auth/login");
       showToast("Please log in to continue", "warning");
     }
   };
-  // console.log("cartProduct", cartProduct);
+
   return (
-    <>
-      <Navbar className="my-6">
+    <div className="relative">
+      <Navbar className="my-6 ">
         <NavbarBrand>
-          <a href="/" className="font-bold text-4xl text-red-600">
+          <a href="/" className="font-bold text-4xl font-greyQe text-red-600">
             E-Come
           </a>
         </NavbarBrand>
@@ -98,18 +101,40 @@ export default function Header() {
             </button>
           </NavbarItem>
           <NavbarItem>
-            <BiHeart
-              size={32}
-              className="cursor-pointer"
-              onClick={() => handleNavigation("/wishlist")}
-            />
-          </NavbarItem>
-          <NavbarItem>
-            <IoIosLogOut
-              size={32}
-              className="cursor-pointer"
-              onClick={handleLogout}
-            />
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="relative"
+              >
+                <LuUser2 size={32} className="cursor-pointer" />
+              </button>
+              {dropdownOpen && (
+                <div
+                  className={`absolute right-0 top-10 bg-white border shadow-2xl rounded-xl p-4 w-48 transition-all duration-300 transform ${
+                    dropdownOpen
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-95"
+                  }`}
+                >
+                  <ul className="list-none">
+                    <li
+                      onClick={() => {
+                        handleNavigation("/account");
+                      }}
+                      className="py-2 px-2 rounded-md hover:bg-[#f1f2f4] cursor-pointer hover:text-red-600"
+                    >
+                      My Account
+                    </li>
+                    <li
+                      className="py-2 hover:bg-[#f1f2f4] px-2 rounded-md cursor-pointer hover:text-red-600"
+                      onClick={handleLogout}
+                    >
+                      Log Out
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end" className="md:hidden flex">
@@ -123,6 +148,6 @@ export default function Header() {
           </NavbarItem>
         </NavbarContent>
       </Navbar>
-    </>
+    </div>
   );
 }

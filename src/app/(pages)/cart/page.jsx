@@ -1,29 +1,40 @@
 "use client";
-import { auth, firestore } from "@/config/firebase";
+import { auth, firestore } from "../../../config/firebase";
 import { fetchUser } from "@/store/reducer/userFetchReducer";
 import { useDisclosure } from "@nextui-org/react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  arrayRemove,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  runTransaction,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ImCross } from "react-icons/im";
 import { useDispatch, useSelector } from "react-redux";
 import productData from "../../../data/product.json";
 import CheckoutModal from "../../../(components)/Checkout/CheckoutModal";
-
+import Loader from "../../../(components)/Loader/Loader"; 
 export default function Cart() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  const [loading, setLoading] = useState(false);
+  const userData = useSelector((state) => state.user.userData);
   const dispatch = useDispatch();
-  const userData = auth.currentUser;
-  const user = useSelector((state) => state.user.userData);
-  const [cartProduct, setCartProduct] = useState([]);
 
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
 
+  const [cartProduct, setCartProduct] = useState([]);
   useEffect(() => {
     const getCart = async () => {
+      setLoading(true); 
       if (userData && userData.uid) {
         const q = query(
           collection(firestore, "carts"),
@@ -32,22 +43,26 @@ export default function Cart() {
 
         try {
           const querySnapshot = await getDocs(q);
+          const products = [];
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             const productsWithQuantities = data.products.map((product) => ({
               ...product,
               quantity: product.quantity || 1,
             }));
-            setCartProduct(productsWithQuantities);
+            products.push(...productsWithQuantities);
           });
+          setCartProduct(products);
         } catch (error) {
           console.error("Error fetching cart data:", error);
+        } finally {
+          setLoading(false); // Set loading to false after fetch completes
         }
       }
     };
 
     getCart();
-  }, [user]);
+  }, [userData]);
 
   const handleIncrement = (index) => {
     const updatedCart = [...cartProduct];
@@ -77,6 +92,35 @@ export default function Cart() {
     quantity: cartProduct[index].quantity,
   }));
 
+  const handleDeleteProduct = async (productId) => {
+    const userCartRef = doc(collection(firestore, "carts"), userData.uid);
+
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        const cartDoc = await transaction.get(userCartRef);
+        const cartData = cartDoc.data();
+
+        if (!cartData || !cartData.products) {
+          console.warn("Product not found in cart.");
+          return;
+        }
+
+        const updatedProducts = cartData.products.filter(
+          (product) => product.productId !== productId
+        );
+
+        transaction.update(userCartRef, { products: updatedProducts });
+      });
+
+      setCartProduct(
+        cartProduct.filter((item) => item.productId !== productId)
+      );
+      console.log("Product successfully deleted from cart.");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+
   return (
     <>
       <div className="container mx-auto px-4 py-8">
@@ -86,7 +130,11 @@ export default function Cart() {
           <div className="h-[2px] w-full max-w-sm md:max-w-lg bg-black" />
         </div>
 
-        {filteredProducts?.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center mt-8 h-[500px]">
+            <Loader />
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div>
             <div className="overflow-x-auto mt-8">
               <table className="min-w-full border-collapse">
@@ -139,7 +187,10 @@ export default function Cart() {
                         </td>
                         <td className="py-4 px-6">${subtotal.toFixed(2)}</td>
                         <td className="py-4 px-6">
-                          <button className="text-red-500 hover:text-red-700">
+                          <button
+                            onClick={() => handleDeleteProduct(product.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
                             <ImCross size={20} />
                           </button>
                         </td>
@@ -157,9 +208,7 @@ export default function Cart() {
               </div>
               <div className="flex justify-between items-center mb-3">
                 <span className="text-lg">Subtotal:</span>
-                <span className="text-lg">
-                  ${totalAmount.toFixed(2)}
-                </span>
+                <span className="text-lg">${totalAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center mb-6">
                 <span className="text-lg">Shipping:</span>

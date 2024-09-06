@@ -4,10 +4,11 @@ import { FaXTwitter } from "react-icons/fa6";
 import { IoIosCall, IoIosMail } from "react-icons/io";
 export default function DetailFooter() {
   return (
-    <div className="flex justify-center my-4">
+    <div className="flex justify-center my-4 max-[600px]:mx-10">
       <div className="w-[1200px]">
-        <div className="flex justify-around">
-          <div className="">
+        <div className="flex max-[950px]:flex-col  justify-around ">
+          <div className="flex justify-between max-[415px]:flex-col">
+          <div className="w-">
             <h1 className="text-red-600 text-3xl font-greyQe mb-4">E-comme</h1>
             <div className="flex w-[300px] items-center gap-5  mb-3 ">
               <h1>
@@ -65,6 +66,8 @@ export default function DetailFooter() {
             <h1 className="text-sm text-[#666666] mb-3">Wish List</h1>
             <h1 className="text-sm text-[#666666] mb-3">Contact</h1>
           </div>
+          </div>
+          <div className="flex  justify-between gap-32 max-[415px]:gap-10 max-[415px]:flex-col">
           <div className="">
             <h1 className="text-lg font-semibold  mb-3">
               <u>Quick Menu</u>
@@ -97,6 +100,8 @@ export default function DetailFooter() {
               </button>
             </div>
           </div>
+          </div>
+
         </div>
       </div>
     </div>

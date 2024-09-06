@@ -1,6 +1,6 @@
 "use client";
 import { showToast } from "@/(components)/toast/Toast";
-import { auth } from "@/config/firebase";
+import { auth } from "../../../config/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -11,26 +11,34 @@ const initialValue = {
 
 export default function Login() {
   const [state, setState] = useState(initialValue);
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
   const handleChange = (e) =>
     setState((s) => ({ ...s, [e.target.name]: e.target.value }));
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const {email,password}=state
+    setLoading(true);
+    const { email, password } = state;
     try {
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+      setLoading(true);
+      signInWithEmailAndPassword(auth, email, password).then(
+        (userCredential) => {
           const user = userCredential.user;
-          router.push("/"); 
-        })
-        .catch((error) => {
-          showToast("Invalid Email or Password", "error");
+          router.push("/");
+        }
+      );
+      setLoading(false).catch((error) => {
+        showToast("Invalid Email or Password", "error");
 
-          const errorCode = error.code;
-          const errorMessage = error.message;
-        });
-    } catch (error) {}
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    setLoading(false);
   };
 
   return (
@@ -63,7 +71,7 @@ export default function Login() {
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-[100px] w-full text-lg font-semibold shadow-md transition-transform transform hover:scale-105 mb-4"
           >
-            SIGN IN
+            {loading ? "Loading..." : "LOGIN"}
           </button>
         </form>
         <span className="text-sm text-white mt-4">

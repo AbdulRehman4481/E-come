@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { auth, firestore } from "@/config/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { auth, firestore } from "../../config/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
 const initialState = {
@@ -8,30 +8,40 @@ const initialState = {
   isLoading: false,
 };
 
-export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
-  return new Promise((resolve, reject) => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const userRef = doc(firestore, "users", user.uid);
-          const userDoc = await getDoc(userRef);
-
-          if (userDoc.exists()) {
-            resolve(userDoc.data());  
-          } else {
-            reject("User document does not exist");
+export const fetchUser = createAsyncThunk("user/fetchUser", async (_, thunkAPI) => {
+  try {
+    return new Promise((resolve, reject) => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const q = query(
+            collection(firestore, "users"),
+            where("uid", "==", user.uid)
+          );
+          try {
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+              const userData = querySnapshot.docs.map((doc) => doc.data())[0];
+              resolve(userData);
+            } else {
+              resolve(null); // No data found for this user
+            }
+          } catch (error) {
+            console.error("Error fetching user data from Firestore:", error);
+            reject(error);
           }
-        } catch (error) {
-          reject(error.message);  
+        } else {
+          console.log("User is not authenticated.");
+          resolve(null); // Resolve with null if user is not authenticated
         }
-      } else {
-        resolve(null);  
-      }
+      });
     });
-  });
+  } catch (error) {
+    console.error("Error in fetchUser:", error);
+    return thunkAPI.rejectWithValue(error.message);
+  }
 });
 
-
+// Redux slice for user data
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -43,7 +53,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.userData = action.payload;
+        state.userData = action.payload; // Store fetched user data
       })
       .addCase(fetchUser.rejected, (state) => {
         state.isLoading = false;

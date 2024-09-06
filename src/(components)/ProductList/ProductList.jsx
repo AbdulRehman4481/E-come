@@ -19,8 +19,8 @@ export default function ProductList() {
   const renderProducts = () =>
     selectedProducts.map((product) => (
       <div className="flex justify-center" key={product.id}>
-        <div className="  py-2 overflow-hidden transition-shadow duration-300">
-          <ProductCard image={product.image} category={product.category} name={product.name }price={product.price} />
+        <div className="  py-2 overflow-hidden transition-shadow duration-300 max-[640px]:w-[300px]">
+          <ProductCard image={product.image} category={product.category} name={product.name } price={product.price} id={product.id} />
         </div>
       </div>
     ));
@@ -97,7 +97,7 @@ export default function ProductList() {
         <div className="h-[2px] w-60 bg-black" />
       </div>
       <div className="flex justify-center">
-        <div className="products-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+        <div className="products-grid grid grid-cols-1  sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
           {renderProducts()}
         </div>
       </div>

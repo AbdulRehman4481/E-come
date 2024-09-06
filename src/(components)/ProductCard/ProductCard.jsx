@@ -1,21 +1,27 @@
-import { auth, firestore } from "@/config/firebase";
-import { fetchUser } from "@/store/reducer/userFetchReducer";
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, firestore } from "../../config/firebase";
+import { useDisclosure } from "@nextui-org/react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { BiCartAdd } from "react-icons/bi";
 import { FaRegEye } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
 import Button from "../Button/Button";
-import { showToast } from "../toast/Toast";
 import CheckoutModal from "../Checkout/CheckoutModal";
-import { useDisclosure } from "@nextui-org/react";
+import DetailModal from "../DetailMOdal/DetailModal";
+import { showToast } from "../toast/Toast";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUser } from "@/store/reducer/userFetchReducer";
+import { useEffect } from "react";
 
 export default function ProductCard({ image, category, name, price, id }) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen: isCheckoutOpen, onOpen: onOpenCheckout, onOpenChange: onCheckoutOpenChange } = useDisclosure();
+  const { isOpen: isDetailOpen, onOpen: onOpenDetail, onOpenChange: onDetailOpenChange } = useDisclosure();
   const productData = [{ productId: id, quantity: 1 }];
-  const userData = auth.currentUser;
+  const userData = useSelector((state) => state.user.userData);
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
   const handleAddCart = async () => {
     if (!userData) {
       showToast("Please log in first to add products to your cart", "info");
@@ -46,32 +52,42 @@ export default function ProductCard({ image, category, name, price, id }) {
             products: [...cartData.products, { productId: id, quantity: 1 }],
           });
         }
+      } else {
+        // Handle case where cart doesn't exist
+        await updateDoc(cartRef, {
+          products: [{ productId: id, quantity: 1 }],
+        });
       }
 
       showToast("Product added to cart", "success");
     } catch (error) {
-      showToast("something Wrong While Add Product in Cart", "error");
-      console.log("error", error);
+      showToast("Something went wrong while adding the product to the cart", "error");
+      console.error("Error:", error);
     }
   };
+
   const handleBuy = () => {
     if (!userData) {
-      showToast("Please log in first to add products to your cart", "info");
+      showToast("Please log in first to buy products", "info");
       return;
     }
-    onOpen();
+    onOpenCheckout();
+  };
+
+  const handleDetailView = () => {
+    onOpenDetail();
   };
 
   return (
     <>
-      <div className="w-[250px] md:w-[300px] lg:w-[300px] xl:max-w-[400px]  p-2 md:p-4 border rounded-lg">
+      <div className="w-[250px]  md:w-[300px] lg:w-[300px] xl:max-w-[400px] max-[620px]:w-full p-2 md:p-4 border rounded-lg">
         <div className="flex justify-center items-center">
           <Image
             src={image}
             alt="Product Image"
             width={144}
             height={192}
-            className="w-28 h-40 md:w-32 md:h-44 lg:w-36 lg:h-48 object-contain"
+            className="w-28 h-40 md:w-32 md:h-44 lg:w-36 lg:h-48 object-cover"
           />
         </div>
         <div className="mt-2">
@@ -81,7 +97,7 @@ export default function ProductCard({ image, category, name, price, id }) {
             <span className="font-semibold text-sm md:text-base text-[#898e92] mb-2">
               ${price}
             </span>
-            <span className="cursor-pointer">
+            <span onClick={handleDetailView} className="cursor-pointer">
               <FaRegEye color="black" size={20} />
             </span>
           </div>
@@ -94,12 +110,20 @@ export default function ProductCard({ image, category, name, price, id }) {
           </div>
         </div>
       </div>
+
       <CheckoutModal
-        isOpen={isOpen}
-        onOpen={onOpen}
-        onOpenChange={onOpenChange}
+        isOpen={isCheckoutOpen}
+        onOpen={onOpenCheckout}
+        onOpenChange={onCheckoutOpenChange}
         productIdsAndQuantities={productData}
         totalAmount={price}
+      />
+
+      <DetailModal
+        isOpen={isDetailOpen}
+        onOpen={onOpenDetail}
+        onOpenChange={onDetailOpenChange}
+        detailId={id}
       />
     </>
   );

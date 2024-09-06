@@ -1,52 +1,41 @@
-import React, { useState } from "react";
-import Button from "../Button/Button";
-import ProductCard from "../ProductCard/ProductCard";
-import ZoomProduct from "../ZoomProduct/ZoomProduct";
-import ProductBar from "../ProductBar/ProductBar";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import image2 from "../../../public/assets/Images/h3_b2.jpg";
 import image4 from "../../../public/assets/Images/h3_b3.jpg";
+import Button from "../Button/Button";
+import ProductBar from "../ProductBar/ProductBar";
+import ProductCard from "../ProductCard/ProductCard";
+import ZoomProduct from "../ZoomProduct/ZoomProduct";
 
 import Slider from "react-slick";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import Product from "../../data/product.json";
-
-const CustomPrevArrow = ({ onClick }) => {
-  return (
-    <div
-      className="absolute flex border-1 left-1 sm:-left-5 bg-white top-[45%] h-10 justify-center items-center w-10 transform -translate-y-1/2 z-10 cursor-pointer rounded-lg"
-      onClick={onClick}
-    >
-      <IoIosArrowBack color="black" size={20} />
-    </div>
-  );
-};
-
-const CustomNextArrow = ({ onClick }) => {
-  return (
-    <div
-      className="absolute flex border-1 right-1 sm:-right-2 bg-white top-[45%] h-10 justify-center items-center w-10 transform -translate-y-1/2 z-10 cursor-pointer rounded-lg"
-      onClick={onClick}
-    >
-      <IoIosArrowForward color="black" size={20} />
-    </div>
-  );
-};
+import Products from "../../data/product.json";
 
 export default function TopProduct() {
-  const [activeIndex, setActiveIndex] = useState(0);
 
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [filterText, setTilterText] = useState("Featured");
+  const [showProduct, setShowProduct] = useState([]);
+  const sortedProducts = Products.sort((a, b) => a.rating - b.rating);
+  const computers = Products.filter((pro) => pro.category === "computer");
   const handleAfterChange = (currentSlide) => {
     setActiveIndex(currentSlide);
   };
+  useEffect(() => {
+    if (filterText === "Featured") {
+      setShowProduct(Products);
+    } else if (filterText === "Top Rated") {
+      setShowProduct(sortedProducts);
+    } else if (filterText === "Computer") {
+      setShowProduct(computers);
+    }
+  }, [filterText]);
 
   const settings = {
-    dots: false,
+    dots: true,
     infinite: true,
     speed: 500,
     slidesToShow: 3,
+    arrows: false,
     slidesToScroll: 1,
-    afterChange: handleAfterChange,
     responsive: [
       {
         breakpoint: 1024,
@@ -72,47 +61,64 @@ export default function TopProduct() {
         },
       },
     ],
+    afterChange: handleAfterChange,
     customPaging: (i) => (
       <div
-        className={`w-4 h-4 rounded-full ${
+        className={`w-4 h-4  rounded-full ${
           i === activeIndex ? "bg-primary" : "bg-gray-500"
         } transition-colors duration-200`}
       />
     ),
     appendDots: (dots) => (
-      <div className="absolute flex flex-col justify-center w-full">{dots}</div>
+      <div className="absolute flex flex-col justify-center w-full mt-9">{dots}</div>
     ),
-    nextArrow: <CustomNextArrow />,
-    prevArrow: <CustomPrevArrow />,
   };
 
   return (
-    <div className="flex justify-center items-center mt-20 px-4">
-      <div className="flex flex-col lg:flex-row gap-5">
-        <ProductBar />
+    <div className="flex justify-center items-center mt-20 px-4" id="deal-container">
+      <div className="flex max-[1100px]:flex-col flex-row gap-5">
+        <ProductBar sortedProducts={sortedProducts} heading={"Top Product"} />
         <div className=" ">
           <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-            <Button text={"Featured"} size={"lg"} />
-            <Button text={"Top Rated"} size={"lg"} />
-            <Button text={"New Arrivals"} size={"lg"} />
+            <Button
+              text={"Featured"}
+              size={"lg"}
+              click={() => setTilterText("Featured")}
+            />
+            <Button
+              text={"Top Rated"}
+              size={"lg"}
+              click={() => setTilterText("Top Rated")}
+            />
+            <Button
+              text={"Computer"}
+              size={"lg"}
+              click={() => setTilterText("Computer")}
+            />
           </div>
-          <div className="max-[915px]:flex max-[915px]:justify-center">
+          <div className="max-[915px]:flex max-[915px]:justify-center mt-10 ">
             <div
               id="top-product"
-              className="relative w-[900px] max-[915px]:w-[600px] max-[615px]:w-[350px] lg:ml-5 h-fit mt-10"
+              className="relative max-w-[950px] max-[1150px]:max-w-[900px] max-[923px]:w-[700px] max-[776px]:w-[600px] max-[620px]:w-[300px] lg:ml-5 h-fit "
             >
               <Slider {...settings}>
-                {Product.map((pro, i) => {
+                {showProduct?.slice(0, 5).map((pro, i) => {
                   return (
-                    <div key={i}> 
-                      <ProductCard id={pro.id} image={pro.image} category={pro.category} name={pro.name } price={pro.price} />
+                    <div key={i}>
+                      <ProductCard
+                        id={pro.id} mt-10
+                        image={pro.image}
+                        category={pro.category}
+                        name={pro.name}
+                        price={pro.price}
+                      />
                     </div>
                   );
                 })}
               </Slider>
             </div>
           </div>
-          <div className="p-6 flex flex-col sm:flex-row gap-6">
+          <div className="p-6 flex flex-col sm:flex-row gap-6 mt-10">
             <ZoomProduct image={image2} sale={"30"} title={"Kbox Controller"} />
             <ZoomProduct image={image4} sale={"30"} title={"Smart Watch"} />
           </div>

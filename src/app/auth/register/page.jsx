@@ -17,6 +17,7 @@ export default function Register() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) =>
@@ -24,22 +25,29 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if (state.password !== confirmPassword) {
       setErrorMessage("Passwords do not match!");
     } else {
       setErrorMessage("");
+      setLoading(true);
       const { email, password, userName } = state;
-      await createUserWithEmailAndPassword(auth, email, password)
-        .then(async (userCredential) => {
+      await createUserWithEmailAndPassword(auth, email, password).then(
+        async (userCredential) => {
           const user = userCredential.user;
-         await createUserProfile(user, userName);
-          await createCart(user.uid); 
-          router.push("/"); 
-        })
+          await createUserProfile(user, userName);
+          await createCart(user.uid);
+          router.push("/");
+        }
+      );
+      setLoading(false)
         .catch((error) => {
           setErrorMessage("SomeThing is Wrong");
           const errorCode = error.code;
           const errorMessage = error.message;
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   };
@@ -64,7 +72,7 @@ export default function Register() {
     const cartData = {
       userId,
       products: [],
-      orders:[],
+      orders: [],
       status: "open",
       createdAt: serverTimestamp(),
     };
@@ -138,7 +146,7 @@ export default function Register() {
             onClick={handleRegister}
             className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-[100px] w-full text-lg font-semibold shadow-md transition-transform transform hover:scale-105 mb-4"
           >
-            REGISTER
+            {loading ? "Loading..." : "REGISTER"}
           </button>
           <span className="text-sm text-white mt-4">
             Already have an account?{" "}

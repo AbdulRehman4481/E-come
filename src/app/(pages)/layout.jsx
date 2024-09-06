@@ -1,13 +1,21 @@
 "use client";
 import { useDispatch, useSelector } from "react-redux";
-import DetailFooter from "../../(components)/DetailFooter/DetailFooter";
-import Footer from "../../(components)/Footer/Footer";
-import Header from "../../(components)/Header/Header";
+import dynamic from "next/dynamic";
+const DetailFooter = dynamic(
+  () => import("../../(components)/DetailFooter/DetailFooter"),
+  { ssr: false }
+);
+const Footer = dynamic(() => import("../../(components)/Footer/Footer"), {
+  ssr: false,
+});
+const Header = dynamic(() => import("../../(components)/Header/Header"), {
+  ssr: false,
+});
+
 import { useEffect } from "react";
 import { fetchUser } from "@/store/reducer/userFetchReducer";
 export default function RootLayout({ children }) {
   const user = useSelector((state) => state.user.userData);
-  console.log(user)
   const dispatch = useDispatch();
 
   useEffect(() => {

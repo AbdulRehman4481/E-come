@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -13,10 +13,12 @@ import bankLogo from "../../../public/assets/Images/bank.png";
 import cashLogo from "../../../public/assets/Images/cash.png";
 import screenShot from "../../../public/assets/Images/jazzcashImage.jpg";
 import Image from "next/image";
-import { auth, firestore, storage } from "@/config/firebase";
+import { auth, firestore, storage } from "../../config/firebase";
 import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { showToast } from "../toast/Toast";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUser } from "@/store/reducer/userFetchReducer";
 
 export default function CheckoutModal({
   isOpen,
@@ -24,8 +26,13 @@ export default function CheckoutModal({
   productIdsAndQuantities,
   totalAmount,
 }) {
-  const userData = auth.currentUser;
-  console.log("productIdsAndQuantities", productIdsAndQuantities);
+  const userData = useSelector((state) => state.user.userData);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
+  ("productIdsAndQuantities", productIdsAndQuantities);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [paymentNumber, setPaymentNumber] = useState("");
   const [file, setFile] = useState(null);
@@ -138,7 +145,6 @@ export default function CheckoutModal({
     }
   };
 
-  // {file && <Image src={URL.createObjectURL(file)} style={{ width: 50, height: 50 }} />}
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl">

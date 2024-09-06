@@ -5,7 +5,7 @@ import ProductBar from "../ProductBar/ProductBar";
 import Slider from "react-slick";
 import Product from "../../data/product.json";
 import { useDisclosure } from "@nextui-org/react";
-import DetailModal from "../DetailModaldad/DetailModal";
+import DetailModal from "../DetailModal/DetailModal";
 
 export default function SuperDeals() {
   const [activeIndex, setActiveIndex] = useState(0);

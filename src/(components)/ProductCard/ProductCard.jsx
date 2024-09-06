@@ -6,7 +6,7 @@ import { BiCartAdd } from "react-icons/bi";
 import { FaRegEye } from "react-icons/fa";
 import Button from "../Button/Button";
 import CheckoutModal from "../Checkout/CheckoutModal";
-import DetailModal from "../DetailModaldad/DetailModal";
+import DetailModal from "../DetailModal/DetailModal";
 import { showToast } from "../toast/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "@/store/reducer/userFetchReducer";

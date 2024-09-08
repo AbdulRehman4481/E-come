@@ -39,8 +39,7 @@ export default function Register() {
           await createCart(user.uid);
           router.push("/");
         }
-      );
-      setLoading(false)
+      )
         .catch((error) => {
           setErrorMessage("SomeThing is Wrong");
           const errorCode = error.code;

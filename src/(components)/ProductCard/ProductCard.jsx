@@ -66,14 +66,6 @@ export default function ProductCard({ image, category, name, price, id }) {
     }
   };
 
-  const handleBuy = () => {
-    if (!userData) {
-      showToast("Please log in first to buy products", "info");
-      return;
-    }
-    onOpenCheckout();
-  };
-
   const handleDetailView = () => {
     onOpenDetail();
   };
@@ -87,37 +79,24 @@ export default function ProductCard({ image, category, name, price, id }) {
             alt="Product Image"
             width={144}
             height={192}
-            className="w-28 h-40 md:w-32 md:h-44 lg:w-36 lg:h-48 object-cover"
+            className="w-28 h-40 md:w-32 md:h-44 lg:w-36 lg:h-48 object-contain"
           />
         </div>
         <div className="mt-2">
           <span className="font-bold text-sm md:text-base">{category}</span>
           <h1 className="text-lg md:text-xl font-semibold my-2">{name}</h1>
-          <div className="flex justify-between items-center">
             <span className="font-semibold text-sm md:text-base text-[#898e92] mb-2">
               ${price}
             </span>
-            <span onClick={handleDetailView} className="cursor-pointer">
-              <FaRegEye color="black" size={20} />
-            </span>
-          </div>
           <hr className="my-2" />
           <div className="flex justify-between items-center mt-2">
             <button onClick={handleAddCart} className="cursor-pointer">
               <BiCartAdd size={40} />
             </button>
-            <Button text={"Buy Now"} size={"base"} click={handleBuy} />
+            <Button text={"Preview"} size={"base"} click={handleDetailView} />
           </div>
         </div>
       </div>
-
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onOpen={onOpenCheckout}
-        onOpenChange={onCheckoutOpenChange}
-        productIdsAndQuantities={productData}
-        totalAmount={price}
-      />
 
       <DetailModal
         isOpen={isDetailOpen}

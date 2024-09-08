@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 export default function Categories({ handleCategoryChange }) {
+  const [category, setCategory] = useState();
   const router = useRouter();
 
   const categoriesList = [
@@ -17,6 +18,7 @@ export default function Categories({ handleCategoryChange }) {
   ];
 
   const handleClick = (selectedCategory) => {
+    setCategory(selectedCategory);
     if (handleCategoryChange) {
       handleCategoryChange(selectedCategory);
       return;
@@ -35,7 +37,13 @@ export default function Categories({ handleCategoryChange }) {
                 onClick={() => {
                   handleClick(cat.category);
                 }}
-                className="text-sm sm:text-base md:text-lg text-[#898e92] font-medium cursor-pointer rounded-md p-2"
+                className={`text-sm sm:text-base md:text-lg text-[#898e92] hover:text-red-600
+                  ${
+                    category === cat.category
+                      ? "text-red-600"
+                      : "text-[#898e92]"
+                  }
+                  font-medium cursor-pointer rounded-md p-2`}
               >
                 {cat.category}
               </li>

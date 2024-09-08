@@ -1,6 +1,7 @@
 "use client";
 import { auth, firestore } from "../../config/firebase";
 import {
+  Button,
   Navbar,
   NavbarBrand,
   NavbarContent,
@@ -26,23 +27,23 @@ export default function Header() {
   const userData = auth.currentUser;
 
   useEffect(() => {
-      const getCart = async () => {
-        if (userData && userData.uid) {
-          const q = query(
-            collection(firestore, "carts"),
-            where("userId", "==", userData.uid)
-          );
-          try {
-            onSnapshot(q, (snapshot) => {
-              snapshot.forEach((doc) => {
-                const data = doc.data();
-                setCartProduct(data.products);
-              });
+    const getCart = async () => {
+      if (userData && userData.uid) {
+        const q = query(
+          collection(firestore, "carts"),
+          where("userId", "==", userData.uid)
+        );
+        try {
+          onSnapshot(q, (snapshot) => {
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              setCartProduct(data.products);
             });
-          } catch (error) {
-            console.error("Error fetching cart data:", error);
-          }
+          });
+        } catch (error) {
+          console.error("Error fetching cart data:", error);
         }
+      }
     };
 
     getCart();
@@ -54,15 +55,6 @@ export default function Header() {
       showToast("Logout", "success");
     } catch (error) {
       console.log("error", error);
-    }
-  };
-
-  const handleNavigation = (path) => {
-    if (userData) {
-      redirect(path);
-    } else {
-      router.push("/auth/login");
-      showToast("Please log in to continue", "warning");
     }
   };
 
@@ -89,53 +81,56 @@ export default function Header() {
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end" className="hidden md:flex">
-          <NavbarItem>
-            <button
-              className="relative"
-              onClick={() => handleNavigation("/cart")}
-            >
-              <BsCart4 size={32} className="cursor-pointer" />
-              <span className="bg-red-600 text-xs text-white py-1 px-2 rounded-full absolute top-0">
-                {cartProduct.length}
-              </span>
-            </button>
-          </NavbarItem>
-          <NavbarItem>
-            <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="relative"
-              >
-                <LuUser2 size={32} className="cursor-pointer" />
-              </button>
-              {dropdownOpen && (
-                <div
-                  className={`absolute right-0 top-10 bg-white border shadow-2xl rounded-xl p-4 w-48 transition-all duration-300 transform ${
-                    dropdownOpen
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 scale-95"
-                  }`}
-                >
-                  <ul className="list-none">
-                    <li
-                      onClick={() => {
-                        handleNavigation("/account");
-                      }}
-                      className="py-2 px-2 rounded-md hover:bg-[#f1f2f4] cursor-pointer hover:text-red-600"
+          {userData ? (
+            <>
+              <NavbarItem>
+                <a href="/cart" className="relative">
+                  <BsCart4 size={32} className="cursor-pointer" />
+                  <span className="bg-red-600 text-xs text-white py-1 px-2 rounded-full absolute top-0 right-0">
+                    {cartProduct.length}
+                  </span>
+                </a>
+              </NavbarItem>
+              <NavbarItem>
+                <div className="relative">
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="relative"
+                  >
+                    <LuUser2 size={32} className="cursor-pointer" />
+                  </button>
+                  {dropdownOpen && (
+                    <div
+                      className={`absolute right-0 top-10 bg-white border shadow-2xl rounded-xl p-4 w-48 transition-all duration-300 transform ${
+                        dropdownOpen
+                          ? "opacity-100 scale-100"
+                          : "opacity-0 scale-95"
+                      }`}
                     >
-                      My Account
-                    </li>
-                    <li
-                      className="py-2 hover:bg-[#f1f2f4] px-2 rounded-md cursor-pointer hover:text-red-600"
-                      onClick={handleLogout}
-                    >
-                      Log Out
-                    </li>
-                  </ul>
+                      <ul className="list-none">
+                        <li className="py-2 px-2 rounded-md hover:bg-[#f1f2f4] cursor-pointer hover:text-red-600">
+                          <a href="/account">
+
+                          My Account
+                          </a>
+                        </li>
+                        <li
+                          className="py-2 hover:bg-[#f1f2f4] px-2 rounded-md cursor-pointer hover:text-red-600"
+                          onClick={handleLogout}
+                        >
+                          Log Out
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </NavbarItem>
+              </NavbarItem>
+            </>
+          ) : (
+            <Button color="primary" variant="shadow">
+              <a href="/auth/login">Login</a>
+            </Button>
+          )}
         </NavbarContent>
         <NavbarContent justify="end" className="md:hidden flex">
           <NavbarItem>

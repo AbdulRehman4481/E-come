@@ -135,7 +135,7 @@ export default function Cart() {
             <Loader />
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div>
+          <div className="h-screen">
             <div className="overflow-x-auto mt-8">
               <table className="min-w-full border-collapse">
                 <thead>

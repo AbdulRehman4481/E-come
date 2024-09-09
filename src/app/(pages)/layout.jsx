@@ -24,10 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <div>
       <Header />
-      <div className="h-screen">
-
       {children}
-      </div>
       <DetailFooter />
       <Footer />
     </div>

@@ -8,6 +8,7 @@ export function Providers({ children }) {
   return (
     <Provider store={store}>
       <NextUIProvider>
+
         {children}
         <ToastNotification />
       </NextUIProvider>

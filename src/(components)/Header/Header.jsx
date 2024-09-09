@@ -108,11 +108,8 @@ export default function Header() {
                       }`}
                     >
                       <ul className="list-none">
-                        <li className="py-2 px-2 rounded-md hover:bg-[#f1f2f4] cursor-pointer hover:text-red-600">
-                          <a href="/account">
-
-                          My Account
-                          </a>
+                        <li  className="py-2 px-2 rounded-md hover:bg-[#f1f2f4] cursor-pointer hover:text-red-600">
+                          <a href="/account">My Account</a>
                         </li>
                         <li
                           className="py-2 hover:bg-[#f1f2f4] px-2 rounded-md cursor-pointer hover:text-red-600"
@@ -127,9 +124,11 @@ export default function Header() {
               </NavbarItem>
             </>
           ) : (
-            <Button color="primary" variant="shadow">
-              <a href="/auth/login">Login</a>
-            </Button>
+            <a href="/auth/login">
+              <Button color="primary" variant="shadow">
+                Login
+              </Button>
+            </a>
           )}
         </NavbarContent>
         <NavbarContent justify="end" className="md:hidden flex">

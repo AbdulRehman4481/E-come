@@ -9,18 +9,18 @@ import {
 } from "@nextui-org/react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { jsPDF } from "jspdf";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import bankLogo from "../../../public/assets/Images/bank.png";
 import cashLogo from "../../../public/assets/Images/cash.png";
 import easyLogo from "../../../public/assets/Images/easy.png";
 import jazzLogo from "../../../public/assets/Images/jazz.png";
-import products from "../../data/product.json";
 import { firestore, storage } from "../../config/firebase";
+import products from "../../data/product.json";
 import { showToast } from "../toast/Toast";
-import { jsPDF } from "jspdf";
-import Loader from "../Loader/Loader";
 
 export default function CheckoutModal({
   isOpen,
@@ -30,7 +30,7 @@ export default function CheckoutModal({
 }) {
   const userData = useSelector((state) => state.user.userData);
   const dispatch = useDispatch();
-
+  const router = useRouter();
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
@@ -39,6 +39,15 @@ export default function CheckoutModal({
   const [file, setFile] = useState(null);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const handleClosed = () => {
+    if (!orderPlaced) {
+      onOpenChange();
+    } else {
+      onOpenChange();
+      router.push("/");
+    }
+  };
 
   const produId = productIdsAndQuantities;
   const productIds = produId.map((item) => item.productId);
@@ -489,7 +498,7 @@ export default function CheckoutModal({
               </div>
             </ModalBody>
             <ModalFooter className="flex justify-between">
-              <Button color="danger" variant="light" onPress={onClose}>
+              <Button color="danger" variant="light" onPress={handleClosed}>
                 Close
               </Button>
               {orderPlaced ? (

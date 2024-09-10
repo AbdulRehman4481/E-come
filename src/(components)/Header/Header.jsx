@@ -25,28 +25,28 @@ export default function Header() {
 
   const userData = auth.currentUser;
 
-  useEffect(() => {
-    const getCart = async () => {
-      if (userData && userData.uid) {
-        const q = query(
-          collection(firestore, "carts"),
-          where("userId", "==", userData.uid)
-        );
-        try {
-          onSnapshot(q, (snapshot) => {
-            snapshot.forEach((doc) => {
-              const data = doc.data();
-              setCartProduct(data.products);
+    useEffect(() => {
+      const getCart = async () => {
+        if (userData && userData.uid) {
+          const q = query(
+            collection(firestore, "carts"),
+            where("userId", "==", userData.uid)
+          );
+          try {
+            onSnapshot(q, (snapshot) => {
+              snapshot.forEach((doc) => {
+                const data = doc.data();
+                setCartProduct(data.products);
+              });
             });
-          });
-        } catch (error) {
-          console.error("Error fetching cart data:", error);
+          } catch (error) {
+            console.error("Error fetching cart data:", error);
+          }
         }
-      }
-    };
+      };
 
-    getCart();
-  }, [userData]);
+      getCart();
+    }, [userData]);
 
   const handleLogout = async () => {
     try {

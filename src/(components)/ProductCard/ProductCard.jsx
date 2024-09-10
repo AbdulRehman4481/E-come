@@ -1,27 +1,75 @@
 import { auth, firestore } from "../../config/firebase";
 import { useDisclosure } from "@nextui-org/react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+} from "firebase/firestore";
 import Image from "next/image";
 import { BiCartAdd } from "react-icons/bi";
-import { FaRegEye } from "react-icons/fa";
 import Button from "../Button/Button";
-import CheckoutModal from "../Checkout/CheckoutModal";
 import DetailModal from "../DetailModal/DetailModal";
 import { showToast } from "../toast/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "@/store/reducer/userFetchReducer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function ProductCard({ image, category, name, price, id }) {
-  const { isOpen: isCheckoutOpen, onOpen: onOpenCheckout, onOpenChange: onCheckoutOpenChange } = useDisclosure();
-  const { isOpen: isDetailOpen, onOpen: onOpenDetail, onOpenChange: onDetailOpenChange } = useDisclosure();
-  const productData = [{ productId: id, quantity: 1 }];
-  const userData = useSelector((state) => state.user.userData);
+  const [isInCart, setIsInCart] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const {
+    isOpen: isDetailOpen,
+    onOpen: onOpenDetail,
+    onOpenChange: onDetailOpenChange,
+  } = useDisclosure();
+
+  const userData = auth.currentUser;
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
+
+  useEffect(() => {
+    const getCart = async () => {
+      if (userData && userData.uid) {
+        const q = query(
+          collection(firestore, "carts"),
+          where("userId", "==", userData.uid)
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const products = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const productsWithQuantities = data.products.map((product) => ({
+              ...product,
+              quantity: product.quantity || 1,
+            }));
+            products.push(...productsWithQuantities);
+          });
+
+          // Check if the current product is in the cart
+          const productInCart = products.some(
+            (product) => product.productId === id
+          );
+          console.log("productInCart", productInCart);
+          setIsInCart(productInCart);
+        });
+
+        // Clean up the listener when component unmounts
+        return () => unsubscribe();
+      }
+    };
+
+    getCart();
+  }, [userData, id]);
+
   const handleAddCart = async () => {
     if (!userData) {
       showToast("Please log in first to add products to your cart", "info");
@@ -53,15 +101,19 @@ export default function ProductCard({ image, category, name, price, id }) {
           });
         }
       } else {
-        // Handle case where cart doesn't exist
         await updateDoc(cartRef, {
           products: [{ productId: id, quantity: 1 }],
         });
       }
 
+      setIsInCart(true);
+
       showToast("Product added to cart", "success");
     } catch (error) {
-      showToast("Something went wrong while adding the product to the cart", "error");
+      showToast(
+        "Something went wrong while adding the product to the cart",
+        "error"
+      );
       console.error("Error:", error);
     }
   };
@@ -84,15 +136,23 @@ export default function ProductCard({ image, category, name, price, id }) {
         </div>
         <div className="mt-2">
           <span className="font-bold text-sm md:text-base">{category}</span>
-          <h1 className="text-lg md:text-xl font-semibold my-2">{name}</h1>
-            <span className="font-semibold text-sm md:text-base text-[#898e92] mb-2">
-              ${price}
-            </span>
+          <h1 className="text-lg md:text-xl font-semibold my-2">
+            {name.length > 20 ? `${name.slice(0, 20)}...` : name}
+          </h1>
+          <span className="font-semibold text-sm md:text-base text-[#898e92] mb-2">
+            ${price}
+          </span>
           <hr className="my-2" />
           <div className="flex justify-between items-center mt-2">
-            <button onClick={handleAddCart} className="cursor-pointer">
-              <BiCartAdd size={40} />
-            </button>
+            {isInCart ? (
+              <a  href="/cart" className="text-green-600 font-semibold">
+                Added to Cart
+              </a>
+            ) : (
+              <button onClick={handleAddCart} className="cursor-pointer">
+                <BiCartAdd size={40} />
+              </button>
+            )}
             <Button text={"Preview"} size={"base"} click={handleDetailView} />
           </div>
         </div>

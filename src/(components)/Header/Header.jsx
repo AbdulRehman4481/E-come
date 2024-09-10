@@ -21,9 +21,8 @@ export default function Header() {
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   const [cartProduct, setCartProduct] = useState([]);
-  const [dropdownOpen, setDropdownOpen] = useState(false); // For dropdown toggle
+  const [dropdownOpen, setDropdownOpen] = useState(false); 
 
-  const router = useRouter();
   const userData = auth.currentUser;
 
   useEffect(() => {
@@ -66,20 +65,7 @@ export default function Header() {
             E-Come
           </a>
         </NavbarBrand>
-        <NavbarContent className="hidden md:flex gap-4" justify="center">
-          <NavbarItem className="relative group">
-            <div className="border-1 flex flex-row justify-center rounded-[100px] p-4">
-              <input
-                type="text"
-                className="outline-none w-96 bg-transparent"
-                placeholder="I'm shopping for...."
-              />
-              <button>
-                <BiSearch size={33} />
-              </button>
-            </div>
-          </NavbarItem>
-        </NavbarContent>
+        
         <NavbarContent justify="end" className="hidden md:flex">
           {userData ? (
             <>

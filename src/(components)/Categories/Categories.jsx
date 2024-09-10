@@ -13,8 +13,8 @@ export default function Categories({ handleCategoryChange }) {
     { category: "Laptop Speakers" },
     { category: "Hard Drives" },
     { category: "Batteries" },
-    { category: "Chargers" },
-    { category: "Keyboards" },
+    { category: "Charger" },
+    { category: "Keyboard" },
   ];
 
   const handleClick = (selectedCategory) => {

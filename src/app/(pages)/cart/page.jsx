@@ -1,26 +1,22 @@
 "use client";
-import { auth, firestore } from "../../../config/firebase";
 import { fetchUser } from "@/store/reducer/userFetchReducer";
 import { useDisclosure } from "@nextui-org/react";
 import {
-  arrayRemove,
   collection,
-  deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   runTransaction,
-  updateDoc,
-  where,
+  where
 } from "firebase/firestore";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ImCross } from "react-icons/im";
 import { useDispatch, useSelector } from "react-redux";
-import productData from "../../../data/product.json";
 import CheckoutModal from "../../../(components)/Checkout/CheckoutModal";
-import Loader from "../../../(components)/Loader/Loader"; 
+import Loader from "../../../(components)/Loader/Loader";
+import { firestore } from "../../../config/firebase";
+import productData from "../../../data/product.json";
 export default function Cart() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [loading, setLoading] = useState(false);
@@ -56,7 +52,7 @@ export default function Cart() {
         } catch (error) {
           console.error("Error fetching cart data:", error);
         } finally {
-          setLoading(false); // Set loading to false after fetch completes
+          setLoading(false);
         }
       }
     };
@@ -135,7 +131,7 @@ export default function Cart() {
             <Loader />
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="h-screen">
+          <div className="min-h-screen">
             <div className="overflow-x-auto mt-8">
               <table className="min-w-full border-collapse">
                 <thead>

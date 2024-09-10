@@ -21,24 +21,19 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     const { email, password } = state;
-    try {
-      setLoading(true);
-      signInWithEmailAndPassword(auth, email, password).then(
-        (userCredential) => {
-          const user = userCredential.user;
-          router.push("/");
-        }
-      );
-      setLoading(false).catch((error) => {
-        showToast("Invalid Email or Password", "error");
 
-        const errorCode = error.code;
-        const errorMessage = error.message;
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        router.push("/"); // Successful login, navigate to home
+      })
+      .catch((error) => {
+        console.log(error);
+        showToast("Invalid Email or Password", "error");
+      })
+      .finally(() => {
+        setLoading(false); // Ensure loading is stopped after the request completes
       });
-    } catch (error) {
-      console.log(error);
-    }
-    setLoading(false);
   };
 
   return (

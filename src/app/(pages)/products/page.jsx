@@ -33,13 +33,13 @@ export default function Products() {
   return (
     <div>
       <Categories handleCategoryChange={handleCategoryChange} />{" "}
-      <div>
+      <div className="min-h-screen">
         <div className="flex flex-row justify-center items-center my-10">
           <div className="h-1 w-52 bg-black" />
           <h1 className="text-4xl mx-2">Product List </h1>
           <div className="h-1 w-52 bg-black" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+        <div className="flex flex-wrap justify-center items-center  gap-4">
           {filteredProducts.length != 0 ? (
             <>
               {filteredProducts.map((pro) => (

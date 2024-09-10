@@ -20,6 +20,7 @@ import products from "../../data/product.json";
 import { firestore, storage } from "../../config/firebase";
 import { showToast } from "../toast/Toast";
 import { jsPDF } from "jspdf";
+import Loader from "../Loader/Loader";
 
 export default function CheckoutModal({
   isOpen,
@@ -37,6 +38,7 @@ export default function CheckoutModal({
   const [paymentNumber, setPaymentNumber] = useState("");
   const [file, setFile] = useState(null);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const produId = productIdsAndQuantities;
   const productIds = produId.map((item) => item.productId);
@@ -118,6 +120,7 @@ export default function CheckoutModal({
   };
   const handleOrder = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const cartRef = doc(firestore, "carts", userData.uid);
     try {
       const cartDoc = await getDoc(cartRef);
@@ -142,6 +145,7 @@ export default function CheckoutModal({
         await deleteProducts();
         showToast("Order placed successfully!", "success");
         setOrderPlaced(true);
+        setLoading(false);
       } else {
         showToast("Cart not found.", "error");
       }
@@ -155,6 +159,7 @@ export default function CheckoutModal({
 
   const downloadPDF = () => {
     const pdf = new jsPDF();
+    setLoading(true);
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -254,6 +259,7 @@ export default function CheckoutModal({
     const orderNumber = Math.floor(Math.random() * (100 - 0 + 1)) + 100;
 
     pdf.save(`#${orderNumber}.pdf`);
+    setLoading(false);
   };
 
   return (
@@ -268,9 +274,13 @@ export default function CheckoutModal({
               <div ref={pdfRef}>
                 {orderPlaced ? (
                   <div className="flex justify-center items-center">
-                    <Button color="primary" onClick={downloadPDF}>
-                      Download PDF
-                    </Button>
+                    {loading ? (
+                      <Button color="primary">loading...</Button>
+                    ) : (
+                      <Button color="primary" onClick={downloadPDF}>
+                        Download PDF
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-4">
@@ -485,9 +495,15 @@ export default function CheckoutModal({
               {orderPlaced ? (
                 ""
               ) : (
-                <Button color="primary" onClick={handleOrder}>
-                  Place Order
-                </Button>
+                <>
+                  {loading ? (
+                    <Button color="primary">loading...</Button>
+                  ) : (
+                    <Button color="primary" onClick={handleOrder}>
+                      Place Order
+                    </Button>
+                  )}
+                </>
               )}
             </ModalFooter>
           </>
